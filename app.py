@@ -1,11 +1,14 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 import csv
 import copy
 import argparse
 import itertools
 from collections import Counter
 from collections import deque
+from gtts import gTTS
+import os
+import time
+import pyglet
+
 
 import cv2 as cv
 import numpy as np
@@ -490,17 +493,36 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
-
+sign = " " # ? Global variable sign is used to compare with hand_sign_text for the first time 
 def draw_info_text(image, brect, handedness, hand_sign_text,
                    finger_gesture_text):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
 
     info_text = handedness.classification[0].label[0:]
+   
     if hand_sign_text != "":
         info_text = info_text + ':' + hand_sign_text
         cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                 cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
+        
+        # ? Sign to Voice (Not Optimized properly alternative solution research garnu parcha)  
+        # global sign
+        # if sign!= hand_sign_text:
+        #     output = gTTS(text=hand_sign_text,lang='en',tld='com.au')
+        #     output.save("output.mp3")
+        #     music = pyglet.media.load("output.mp3", streaming=False)
+        #     music.play()
+        #     time.sleep(music.duration)
+        #     os.remove("output.mp3")
+        # #     os.system("start output.mp3")
+        #     sign = hand_sign_text
+
+        # ? sign to voice close
+            
+
+
+        
 
     # if finger_gesture_text != "":
     #     cv.putText(image, "Finger Gesture:" + finger_gesture_text, (10, 60),
