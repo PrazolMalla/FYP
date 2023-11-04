@@ -8,7 +8,8 @@ from gtts import gTTS
 import os
 import time
 import pyglet
-
+from io import BytesIO
+import threading
 
 import cv2 as cv
 import numpy as np
@@ -71,6 +72,7 @@ def main():
 
     keypoint_classifier = KeyPointClassifier()
 
+    # ! I think we don't need this line
     point_history_classifier = PointHistoryClassifier()
 
     # Read labels ###########################################################
@@ -80,6 +82,8 @@ def main():
         keypoint_classifier_labels = [
             row[0] for row in keypoint_classifier_labels
         ]
+    # ! I think we don't need this line
+
     with open(
             'model/point_history_classifier/point_history_classifier_label.csv',
             encoding='utf-8-sig') as f:
@@ -95,6 +99,7 @@ def main():
     history_length = 16
     point_history = deque(maxlen=history_length)
 
+    # ! I think we don't need this line
     # Finger gesture history ################################################
     finger_gesture_history = deque(maxlen=history_length)
 
@@ -149,6 +154,7 @@ def main():
                 else:
                     point_history.append([0, 0])
 
+                # ! I think we don't need this line
                 # Finger gesture classification
                 finger_gesture_id = 0
                 point_history_len = len(pre_processed_point_history_list)
@@ -256,8 +262,9 @@ def pre_process_landmark(landmark_list):
     temp_landmark_list = list(map(normalize_, temp_landmark_list))
 
     return temp_landmark_list
-
-
+    
+    
+# ! I think we don't need this line
 def pre_process_point_history(image, point_history):
     image_width, image_height = image.shape[1], image.shape[0]
 
@@ -493,7 +500,8 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
-sign = " " # ? Global variable sign is used to compare with hand_sign_text for the first time 
+sign = " " # ? Global variable sign is used to compare with hand_sign_text for the first time
+output = None 
 def draw_info_text(image, brect, handedness, hand_sign_text,
                    finger_gesture_text):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
@@ -506,22 +514,7 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
         cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                 cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
         
-        # ? Sign to Voice (Not Optimized properly alternative solution research garnu parcha)  
-        # global sign
-        # if sign!= hand_sign_text:
-        #     output = gTTS(text=hand_sign_text,lang='en',tld='com.au')
-        #     output.save("output.mp3")
-        #     music = pyglet.media.load("output.mp3", streaming=False)
-        #     music.play()
-        #     time.sleep(music.duration)
-        #     os.remove("output.mp3")
-        # #     os.system("start output.mp3")
-        #     sign = hand_sign_text
-
-        # ? sign to voice close
-            
-
-
+        threading.Thread(target=play_audio_threaded, args=(hand_sign_text,)).start()
         
 
     # if finger_gesture_text != "":
@@ -533,6 +526,23 @@ def draw_info_text(image, brect, handedness, hand_sign_text,
 
     return image
 
+def play_audio_threaded(text):
+    global sign
+    if sign != text:
+        sign = text
+        speech = gTTS(text=text, lang='en', tld='com.au')
+        speech_bytes = BytesIO()
+        speech.write_to_fp(speech_bytes)
+        speech_bytes.seek(0)
+        temp_file = "temp.mp3"
+        with open(temp_file, 'wb') as f:
+            f.write(speech_bytes.read())
+        music = pyglet.media.load(temp_file, streaming=False)
+        music.play()
+        os.remove(temp_file)
+        time.sleep(3)
+
+# ! I think we don't need this line
 
 def draw_point_history(image, point_history):
     for index, point in enumerate(point_history):
