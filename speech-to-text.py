@@ -1,13 +1,11 @@
 import speech_recognition 
-import pyttsx3
-import pygame
 import os
 import cv2
 def play_video(word):
         # Check if the video file exists for the given word
     video_file_path = f"video/{word}.mp4"
     if not os.path.exists(video_file_path):
-        cap = cv2.VideoCapture("video/hello.mp4")
+        cap = cv2.VideoCapture("video/idle.mp4")
     else:
         cap = cv2.VideoCapture(video_file_path)
     # Play the video
