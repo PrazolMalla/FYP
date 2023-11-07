@@ -432,7 +432,6 @@ def draw_bounding_rect(use_brect, image, brect):
     return image
 
 sign = " " #* Global variable sign is used to compare with hand_sign_text for the first time
-output = None 
 def draw_info_text(image, brect, handedness, hand_sign_text):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
