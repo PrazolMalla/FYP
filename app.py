@@ -81,7 +81,7 @@ def main():
     
     cvFpsCalc = CvFpsCalc(buffer_len=10)
 
-    history_length = 16
+    # history_length = 16
 
     
     mode = 0
