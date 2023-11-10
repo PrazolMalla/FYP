@@ -10,7 +10,8 @@ import os
 import pyglet
 from io import BytesIO
 import threading
-
+from playsound import playsound
+import platform
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -432,6 +433,7 @@ def draw_bounding_rect(use_brect, image, brect):
     return image
 
 sign = " " #* Global variable sign is used to compare with hand_sign_text for the first time
+lock = threading.Lock()
 def draw_info_text(image, brect, handedness, hand_sign_text):
     cv.rectangle(image, (brect[0], brect[1]), (brect[2], brect[1] - 22),
                  (0, 0, 0), -1)
@@ -448,8 +450,11 @@ def draw_info_text(image, brect, handedness, hand_sign_text):
 
 def play_audio_threaded(text):
     global sign
+    
     if sign != text:
+        
         sign = text
+        lock.acquire()
         speech = gTTS(text=text, lang='en', tld='us')
         speech_bytes = BytesIO()
         speech.write_to_fp(speech_bytes)
@@ -457,9 +462,14 @@ def play_audio_threaded(text):
         temp_file = "temp.mp3"
         with open(temp_file, 'wb') as f:
             f.write(speech_bytes.read())
-        music = pyglet.media.load(temp_file, streaming=False)
-        music.play()
+        if platform.system()=="Darwin":
+            playsound(temp_file)
+        else:
+            music = pyglet.media.load(temp_file, streaming=False)
+            music.play()
+        
         os.remove(temp_file)
+        lock.release()
 
 
 def draw_info(image, fps, mode, number):
