@@ -124,4 +124,6 @@ exit_image = CTkImage(light_image=Image.open(exit_path),
 exit_btn = CTkButton(master=root,hover_text_color=button_bg_color,text_color=button_bg_color,width=40,height=40,text="",
                      fg_color="transparent",image=exit_image,hover=False,command=exit)
 exit_btn.place(relx=0.075,rely=0.05,anchor="ne")
+label5 = CTkLabel(root,text="Back To Home Page",text_color=button_bg_color)
+label5.place(relx=0.095,rely=0.09,anchor="ne")
 root.mainloop()
