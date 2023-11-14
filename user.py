@@ -1,8 +1,6 @@
 #* importing different libraries  
 import csv
 import copy
-import argparse
-import itertools
 from gtts import gTTS
 import os
 import pyglet
@@ -11,19 +9,31 @@ import threading
 from playsound import playsound
 import platform
 import cv2 as cv
-import numpy as np
 import mediapipe as mp
-
+from customtkinter import *
 from utils import CvFpsCalc
 from model import KeyPointClassifier
 from collection import get_args,calc_bounding_rect,calc_landmark_list,pre_process_landmark,draw_landmarks,draw_info
+from colors import *
+from imagepath import *
+from runprogram import open_main_ui
+from PIL import Image,ImageTk
+is_playing =True
 
+def exit ():
+    root.destroy()
+    open_main_ui()
 
-
-
+def on_closing ():
+    global is_playing
+    is_playing = False
+    canvas.image = None
+    canvas.update()
 
 def main():
     #******************* Argument parsing ****************************#
+    global is_playing
+    is_playing = True
     args = get_args()
 
     cap_device = args.device
@@ -65,15 +75,16 @@ def main():
 
     
     mode = 0
-
+    if is_playing:
+        close_btn.place(relx = 0.96, rely=0.065,anchor = "center")
     while True:
+        
         fps = cvFpsCalc.get()
 
         #******  Process Key (ESC: end) ********************#
-        key = cv.waitKey(10)
-        if key == 27:  # ESC
+        if not is_playing: 
+            close_btn.place(relx = 50, rely=50,anchor = "center") # ESC
             break
-        # number, mode = select_mode(key, mode)
 
         #******************* Camera capture ****************#
         ret, image = cap.read()
@@ -119,12 +130,17 @@ def main():
                 )
         number=0
         debug_image = draw_info(debug_image, fps, mode,number)
-
-        cv.imshow('Hand Gesture Recognition', debug_image)
-
+        debug_image = cv.cvtColor(debug_image, cv.COLOR_BGR2RGB)
+        img = Image.fromarray(debug_image)
+        imgtk = ImageTk.PhotoImage(image=img)
+        image.flags.writeable = False
+    
+        canvas.create_image(0,0,anchor=NW,image=imgtk)
+        canvas.image = imgtk
+        canvas.update()
+        # cv.imshow('Hand Gesture Recognition', debug_image)
     cap.release()
-    cv.destroyAllWindows()
-
+    
 
 def draw_bounding_rect(use_brect, image, brect):
     if use_brect:
@@ -144,12 +160,14 @@ def draw_info_text(image, brect, handedness, hand_sign_text):
    
     if hand_sign_text != "":
         info_text = info_text + ':' + hand_sign_text
+
         cv.putText(image, info_text, (brect[0] + 5, brect[1] - 4),
                 cv.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1, cv.LINE_AA)
         
         threading.Thread(target=play_audio_threaded, args=(hand_sign_text,)).start()
+    
     return image
-
+        
 def play_audio_threaded(text):
     global sign
     
@@ -173,5 +191,46 @@ def play_audio_threaded(text):
         os.remove(temp_file)
         lock.release()
 
-if __name__ == '__main__':
-    main()
+
+root = CTk()
+root.title("Speech to Sign")
+root.configure(fg_color = main_bg_color)
+root.geometry("1920x1080")
+root.bind("<Escape>", on_closing)
+root.after(0,root.wm_state,"zoomed")
+
+exit_image = CTkImage(light_image=Image.open(exit_path),
+                                  dark_image=Image.open(exit_path),
+                                  size=(30, 30))
+exit_btn = CTkButton(master=root,hover_text_color=button_bg_color,text_color=button_bg_color,width=40,height=40,text="",
+                     fg_color="transparent",image=exit_image,hover=False,command=exit)
+exit_btn.place(relx=0.075,rely=0.05,anchor="ne")
+label5 = CTkLabel(root,text="Back To Home Page",text_color=button_bg_color)
+label5.place(relx=0.095,rely=0.09,anchor="ne")
+frame = CTkFrame(master=root,width=980,height=960,fg_color = main_bg_color)
+frame.place(relx = 0.5,rely = 0.5,anchor="center")
+
+canvas = CTkCanvas(frame,width=960,height=540,bg=frame_bg_color,borderwidth=0,highlightthickness=0)
+canvas.place(relx=0.1,rely=0.3)
+logo_image = CTkImage(light_image=Image.open(logo_path),
+                                  dark_image=Image.open(logo_path),
+                                  size=(200, 75))
+image_label = CTkLabel(frame,image=logo_image,text="")
+image_label.place(relx = 0.5,rely = 0.15,anchor = "center")
+label3 =CTkLabel(master= frame,text="Sign To Speech TRANSLATION",text_color=brown_color,font=("Arial",-24))
+label3.place(relx = 0.5 , rely=0.2,anchor = "center")
+btn1 =CTkButton(master=frame,text="Open Camera",hover_text_color=white_color,corner_radius=20,
+                fg_color=button_bg_color,border_color=button_bg_color,border_width=2,
+                hover_color=button_bg_color,text_color=white_color,width=150,height=40,
+                font=("Arial",-14),command=main)
+btn1.place(relx = 0.5 , rely=0.25,anchor = "center")
+close_image = CTkImage(light_image=Image.open(close_path),
+                                  dark_image=Image.open(close_path),
+                                  size=(30, 30))
+
+close_btn =CTkButton(master=canvas,hover_text_color=button_bg_color,width=40,height=40,text="",
+                     fg_color="transparent",image=close_image,hover=False,command=on_closing)
+# close_btn.place(relx = 50, rely=50,anchor = "center")
+root.mainloop()
+# if __name__ == '__main__':
+#     main()

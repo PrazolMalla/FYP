@@ -4,20 +4,10 @@ import cv2
 from customtkinter import *
 from runprogram import open_main_ui
 from PIL import Image,ImageTk
-import time
-
-main_bg_color ="#CEC6A1"
-frame_bg_color = "#ddd8bf"
-button_bg_color = "#D7263D"
-white_color = "#ffffff"
-black_color = "#111111"
-brown_color = "#3c2410"
-logo_path = "images/logo.png"
-mic_path = "images/mic.png"
-exit_path = "images/exit1.png"
-
+from colors import *
+from imagepath import *
 def exit ():
-    root.destroy()
+    root1.destroy()
     open_main_ui()
 
 def play_video(word):
@@ -86,14 +76,13 @@ def speech():
             finally:
                 btn1.configure(text="Speech to Sign")
                 btn1.update()
-             
-
-root = CTk()
-root.title("Speech to Sign")
-root.configure(fg_color =main_bg_color)
-root.geometry("1920x1080")
-root.after(0,root.wm_state,"zoomed")
-frame = CTkFrame(master=root,width=600,height=960,fg_color = frame_bg_color)
+           
+root1 = CTk()
+root1.title("Speech to Sign")
+root1.configure(fg_color =main_bg_color)
+root1.geometry("1920x1080")
+root1.after(0,root1.wm_state,"zoomed")
+frame = CTkFrame(master=root1,width=600,height=960,fg_color = frame_bg_color)
 frame.place(relx = 0.5,rely = 0.5,anchor="center")
 
 canvas = CTkCanvas(frame,width=310,height=550,bg=frame_bg_color,borderwidth=0,highlightthickness=0)
@@ -121,9 +110,9 @@ btn1.place(relx = 0.5 , rely=0.25,anchor = "center")
 exit_image = CTkImage(light_image=Image.open(exit_path),
                                   dark_image=Image.open(exit_path),
                                   size=(30, 30))
-exit_btn = CTkButton(master=root,hover_text_color=button_bg_color,text_color=button_bg_color,width=40,height=40,text="",
+exit_btn = CTkButton(master=root1,hover_text_color=button_bg_color,text_color=button_bg_color,width=40,height=40,text="",
                      fg_color="transparent",image=exit_image,hover=False,command=exit)
 exit_btn.place(relx=0.075,rely=0.05,anchor="ne")
-label5 = CTkLabel(root,text="Back To Home Page",text_color=button_bg_color)
+label5 = CTkLabel(root1,text="Back To Home Page",text_color=button_bg_color)
 label5.place(relx=0.095,rely=0.09,anchor="ne")
-root.mainloop()
+root1.mainloop()

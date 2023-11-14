@@ -12,7 +12,7 @@ def open_script(script_name):
         print(f"Error executing {script_name}: {e}")
 
 def open_sign_to_speech():
-    open_script("app.py")
+    open_script("user.py")
 
 def open_speech_to_sign():
     open_script("speech-to-text.py")
